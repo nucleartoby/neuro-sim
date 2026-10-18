@@ -45,6 +45,7 @@ def build_dataset(n_subjects: int = 32, n_stimuli: int = 40, duration: float = 4
     parts: dict[str, list[np.ndarray]] = {k: [] for k in ("X", "y", "subject", "stimulus", "trial", "times", "bp")}
     names: list[str] = []
     trial = 0
+
     for s in range(n_subjects):
         subject = sample_subject(seed * 100_003 + s)
         for k, stimulus in enumerate(stimuli):
@@ -63,15 +64,9 @@ def build_dataset(n_subjects: int = 32, n_stimuli: int = 40, duration: float = 4
             trial += 1
         if progress:
             progress(s + 1, n_subjects)
-    return Dataset(
-        X=np.vstack(parts["X"]),
-        y=np.vstack(parts["y"]),
-        subject=np.concatenate(parts["subject"]),
-        stimulus=np.concatenate(parts["stimulus"]),
-        trial=np.concatenate(parts["trial"]),
-        times=np.concatenate(parts["times"]),
-        band_power=np.concatenate(parts["bp"]),
-        names=names,)
+    return Dataset(X=np.vstack(parts["X"]), y=np.vstack(parts["y"]), subject=np.concatenate(parts["subject"]),
+        stimulus=np.concatenate(parts["stimulus"]), trial=np.concatenate(parts["trial"]), times=np.concatenate(parts["times"]),
+        band_power=np.concatenate(parts["bp"]),names=names,)
 
 
 @dataclass
@@ -191,7 +186,6 @@ def score(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
 
 
 def _correlation_maps(band_power: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Pearson r between each channel × band power and valence / arousal."""
     flat = band_power.reshape(len(band_power), -1)
     flat = (flat - flat.mean(axis=0)) / (flat.std(axis=0) + 1e-12)
     targets = (y - y.mean(axis=0)) / (y.std(axis=0) + 1e-12)
